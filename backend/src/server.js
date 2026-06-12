@@ -1,19 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const { connectDB } = require('./config/db'); // 1. Importar a ligação
 
 const app = express();
 
-// Middlewares
 app.use(cors());
-app.use(express.json()); // Permite receber dados em formato JSON
+app.use(express.json());
 
-// Rota de Teste
 app.get('/', (req, res) => {
     res.json({ mensagem: 'Bem-vindo à API do Sistema de Gestão de Tarefas!' });
 });
 
-// Iniciar o Servidor
+// 2. Ligar à base de dados antes de iniciar o servidor
+connectDB();
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor a correr na porta ${PORT}`);
