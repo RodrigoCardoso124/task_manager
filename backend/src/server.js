@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const { connectDB } = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const taskRoutes = require('./routes/taskRoutes'); // 1. IMPORTADO: Rotas de tarefas
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Rotas
 app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes); // 2. ADICIONADO: Caminho para as tarefas
 
 app.get('/', (req, res) => {
     res.json({ mensagem: 'Bem-vindo à API do Sistema de Gestão de Tarefas!' });
@@ -30,6 +32,7 @@ const startServer = async () => {
     } else {
         console.error('❌ Não foi possível iniciar o servidor porque a ligação à BD falhou.');
     }
+    
 };
 
 startServer();
