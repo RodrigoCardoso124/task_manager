@@ -18,12 +18,13 @@ class UserController {
                 mensagem: 'Utilizador registado com sucesso!',
                 utilizador: newUser
             });
-
+            
         } catch (error) {
             // Se o serviço mandar um erro (ex: email já existe), apanhamos aqui
             return res.status(400).json({ erro: error.message });
         }
     }
+    
 }
 
 module.exports = new UserController();
