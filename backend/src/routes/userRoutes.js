@@ -1,9 +1,14 @@
 const express = require('express');
+const router = express.Router();
 const userController = require('../controllers/userController');
 
-const router = express.Router();
+// 1. Importamos o nosso segurança
+const authMiddleware = require('../middlewares/authMiddleware');
 
-// Rota para o registo: POST http://localhost:5000/api/users/register
 router.post('/register', userController.register);
+router.post('/login', userController.login);
+
+// ROTA NOVA: Colocamos o "authMiddleware" no meio, antes de chamar o controller!
+router.get('/profile', authMiddleware, userController.getProfile);
 
 module.exports = router;
