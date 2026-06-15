@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-// Rota para registar um novo utilizador
-router.post('/register', userController.register);
+// 1. Importamos o nosso segurança
+const authMiddleware = require('../middlewares/authMiddleware');
 
-// ROTA NOVA: Rota para fazer o login
+router.post('/register', userController.register);
 router.post('/login', userController.login);
+
+// ROTA NOVA: Colocamos o "authMiddleware" no meio, antes de chamar o controller!
+router.get('/profile', authMiddleware, userController.getProfile);
 
 module.exports = router;
