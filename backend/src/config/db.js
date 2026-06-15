@@ -1,26 +1,40 @@
-const sql = require('mssql');
+const mssql = require('mssql');
+require('dotenv').config();
 
-const dbConfig = {
+const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    server: '127.0.0.1', 
+    server: process.env.DB_SERVER,
     database: process.env.DB_NAME,
-    // Retirámos a linha da port: 1433 para o Express descobrir a porta dinâmica sozinho
     options: {
-        encrypt: false, 
-        trustServerCertificate: true,
+        encrypt: true, // Usar true para Azure, false para local
+        trustServerCertificate: true // Usar true para desenvolvimento local
     }
 };
+
+let pool;
 
 const connectDB = async () => {
     try {
-        global.dbPool = await sql.connect(dbConfig);
+        pool = await mssql.connect(config);
         console.log('✅ Ligação ao SQL Server estabelecida com sucesso!');
-        return true; // <--- Adiciona isto
+        return true;
     } catch (error) {
-        console.error('❌ Erro ao ligar ao SQL Server:', error);
-        return false; // <--- Adiciona isto
+        console.error('❌ Erro ao ligar ao SQL Server:', error.message);
+        return false;
     }
 };
 
-module.exports = { sql, connectDB };
+// Criamos um helper para o request não falhar se o pool ainda não existir
+const request = () => {
+    if (!pool) {
+        throw new Error('A base de dados não está ligada!');
+    }
+    return pool.request();
+};
+
+// Exportamos o connectDB (usado no server.js) e o request (usado nos repositórios)
+module.exports = {
+    connectDB,
+    request
+};
