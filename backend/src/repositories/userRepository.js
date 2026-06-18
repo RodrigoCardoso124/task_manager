@@ -1,29 +1,32 @@
-const sql = require('mssql');
+const db = require('../config/db'); 
 
 class UserRepository {
-    async findByEmail(email) {
-        // Usar a pool global ativa
-        const request = global.dbPool.request();
-        request.input('email', sql.VarChar, email);
+    
+    // 1. CRIAR UTILIZADOR (Garante que este método está aqui!)
+    async createUser(name, email, passwordHash) {
+        const query = `
+            INSERT INTO users (name, email, password_hash) 
+            OUTPUT INSERTED.* VALUES (@name, @email, @passwordHash)
+        `;
         
-        const result = await request.query('SELECT * FROM Users WHERE email = @email');
-        return result.recordset[0];
+        const result = await db.request()
+            .input('name', name)
+            .input('email', email)
+            .input('passwordHash', passwordHash)
+            .query(query);
+
+        return result.recordset[0]; 
     }
 
-    async create(name, email, passwordHash) {
-        // Usar a pool global ativa
-        const request = global.dbPool.request();
-        request.input('name', sql.VarChar, name);
-        request.input('email', sql.VarChar, email);
-        request.input('password_hash', sql.VarChar, passwordHash);
+    // 2. PROCURAR POR EMAIL (Usado no Login e na validação do Registo)
+    async findByEmail(email) {
+        const query = `SELECT * FROM users WHERE email = @email`;
+        
+        const result = await db.request()
+            .input('email', email)
+            .query(query);
 
-        const result = await request.query(`
-            INSERT INTO Users (name, email, password_hash)
-            OUTPUT INSERTED.id, INSERTED.name, INSERTED.email, INSERTED.created_at
-            VALUES (@name, @email, @password_hash)
-        `);
-
-        return result.recordset[0];
+        return result.recordset[0]; // Devolve o utilizador ou undefined se não encontrar
     }
 }
 

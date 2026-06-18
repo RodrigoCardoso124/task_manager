@@ -5,43 +5,40 @@ class TaskController {
     // 1. Criar Tarefa
     async create(req, res) {
         try {
-            const { title, description } = req.body;
-            // O nosso segurança (authMiddleware) colocou o ID do utilizador aqui!
+            const { title, description, dueDate } = req.body;
             const userId = req.user.id; 
             
-            const newTask = await taskService.createTask(userId, title, description);
-            return res.status(201).json({
-                mensagem: 'Tarefa criada com sucesso!',
-                tarefa: newTask
-            });
+            const newTask = await taskService.createTask(userId, title, description, dueDate);
+            return res.status(201).json({ mensagem: 'Tarefa criada com sucesso!', tarefa: newTask });
         } catch (error) {
             return res.status(400).json({ erro: error.message });
         }
     }
 
     // 2. Listar Tarefas
+    // 2. Listar Tarefas (com suporte a filtros)
     async getAll(req, res) {
         try {
             const userId = req.user.id;
-            const tasks = await taskService.getAllTasks(userId);
+            // Apanha os query params do URL, ex: /api/tasks?status=pending&search=estudar
+            const { status, search } = req.query; 
+            
+            const tasks = await taskService.getAllTasks(userId, status, search);
             return res.status(200).json(tasks);
         } catch (error) {
-            return res.status(500).json({ erro: 'Erro interno ao procurar tarefas.' });
+            return res.status(400).json({ erro: error.message });
         }
     }
 
     // 3. Atualizar Tarefa
     async update(req, res) {
         try {
-            const { id } = req.params; // O ID da tarefa vem no URL (ex: /tasks/5)
-            const { title, description, status } = req.body;
+            const { id } = req.params; 
+            const { title, description, status, dueDate } = req.body;
             const userId = req.user.id;
 
-            const updatedTask = await taskService.updateTask(id, userId, title, description, status);
-            return res.status(200).json({
-                mensagem: 'Tarefa atualizada com sucesso!',
-                tarefa: updatedTask
-            });
+            const updatedTask = await taskService.updateTask(id, userId, title, description, status, dueDate);
+            return res.status(200).json({ mensagem: 'Tarefa atualizada com sucesso!', tarefa: updatedTask });
         } catch (error) {
             return res.status(400).json({ erro: error.message });
         }
